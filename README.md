@@ -7,7 +7,7 @@
 
 `cognitive-os` is a 699-line *specification* — a cognitive architecture carried as prompt protocol by AI harnesses (Claude Code, Hermes, Codex, Gemini, Cursor). It defines a four-tier memory model (§3.1), a forgetting curve (§3.4), and a verification chain (§4.1). But a spec loaded into a context window stores nothing. This repo is the engine that turns §3 of the spec into running software.
 
-**Status: v0 — architecture, schema, and milestone ladder.** The design below is complete; the build is beginning. Every claim on this page describes either what exists (docs) or what is explicitly marked *planned*.
+**Status: M0 walking skeleton is runnable.** CLI `init` / `cycle` / `search` / `health` over a fixture vault, SQLite + FTS5 hybrid search, local ollama embeddings, cycle gates, cycles ledger. The design below is the committed roadmap; M0 is the first executable increment. Every claim on this page describes either what exists (M0 CLI + docs) or what is explicitly marked *planned*.
 
 ## Why this exists
 
@@ -30,6 +30,20 @@ The engine is designed against all three.
 7. **Contradictions are kept, not resolved silently.** Newer wins for active decisions; both versions remain queryable with timestamps (§3.3).
 8. **Cross-project isolation.** Instincts and indexes are scoped per project; no leakage between brains (§3.3).
 
+## M0 — what you can run today
+
+```bash
+cargo build
+./target/debug/cos-engine --home /tmp/cos init --vaults fixtures/vault --embedder ollama:nomic-embed-text
+./target/debug/cos-engine --home /tmp/cos cycle --json     # green: discovered == imported == embedded
+./target/debug/cos-engine --home /tmp/cos search "silent failure" --json
+./target/debug/cos-engine --home /tmp/cos health log
+```
+
+Verified 2026-08-27 against local ollama `nomic-embed-text`: first cycle 3/3/3 green; second cycle `skipped=3` (not a silent zero-import green); dead embedder URL fails at the **embed** gate, exit 1, ledger names the gate. Search returns `_meta.fused_from` from FTS5 + vector cosine.
+
+Vectors live as BLOBs in SQLite (disk-backed, no WASM heap). sqlite-vec ANN is M1 if the corpus needs it — the ceiling that killed PGlite is already gone.
+
 ## Architecture, briefly
 
 ```
@@ -51,9 +65,9 @@ Full detail: [ARCHITECTURE.md](ARCHITECTURE.md). Roadmap: [MILESTONES.md](MILEST
 
 ## Comparison (honest, as of the incident)
 
-| Capability | gbrain 0.18 (incident) | gbrain 0.46 (current) | this engine (planned) |
+| Capability | gbrain 0.18 (incident) | gbrain 0.46 (current) | this engine (M0) |
 |---|---|---|---|
-| Storage | PGlite, in-memory heap | PGlite or Supabase Postgres | SQLite + sqlite-vec, disk |
+| Storage | PGlite, in-memory heap | PGlite or Supabase Postgres | SQLite + FTS5 + vector BLOBs (disk) |
 | Silent-failure defense | none (the incident) | partial (doctor improvements) | cycle gates, hard-fail, JSONL health |
 | Four tiers as schema | no | partial | yes (§3.1 direct mapping) |
 | Forgetting curve | none | none | §3.4 decay + reinforcement |
