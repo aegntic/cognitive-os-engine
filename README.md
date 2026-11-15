@@ -79,4 +79,4 @@ gbrain is excellent software with an active maintainer — the engine exists to 
 
 ## License
 
-MIT, matching the spec repo.
+This repository includes an MIT [LICENSE](LICENSE). The separate [Cognitive OS specification repository](https://github.com/aegntic/cognitive-os) has its own [proprietary LICENSE](https://github.com/aegntic/cognitive-os/blob/main/LICENSE). Refer to each repository’s license for its terms.
