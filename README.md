@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/cover-16x9.jpg" alt="cognitive-os-engine — Executable Rust Memory Engine" width="100%" />
+</p>
+
 # cognitive-os-engine
 
 > The executable memory tier of the [Cognitive OS](https://github.com/aegntic/cognitive-os) specification.
